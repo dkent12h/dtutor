@@ -707,9 +707,7 @@ function openCloud(items, pageNo){
   function resetCloud(all){
     var what = all ? '이 연수의 모든 질문 응답' : '이 질문의 응답';
     if(!window.confirm(what+'을 클라우드에서 모두 지웁니다. 되돌릴 수 없습니다. 계속할까요?')) return;
-    var pw = window.__rstPw || window.prompt('강사 비밀번호를 입력하세요');
-    if(!pw) return;
-    var body = { p_pass: pw, p_session: SHARE_CONFIG.SESSION, p_question: all ? null : sel.value };
+    var body = { p_session: SHARE_CONFIG.SESSION, p_question: all ? null : sel.value };
     fetch(SHARE_CONFIG.SUPABASE_URL.replace(/\/+$/,'') + '/rest/v1/rpc/reset_responses', {
       method:'POST', headers:Object.assign({'Content-Type':'application/json'}, restHdr()), body:JSON.stringify(body)
     }).then(function(r){
@@ -718,10 +716,9 @@ function openCloud(items, pageNo){
         return tx;
       });
     }).then(function(tx){
-      window.__rstPw = pw; err.textContent=''; toast((all?'전체':'이 질문')+' 응답을 초기화했습니다.'); refresh(true);
+      err.textContent=''; toast((all?'전체':'이 질문')+' 응답을 초기화했습니다.'); refresh(true);
     }).catch(function(e){
-      window.__rstPw = null;
-      var why = (/28000|wrong password/i.test(e.message) ? '비밀번호가 맞지 않습니다.' : /PGRST202|404/.test(e.message) ? '서버에 초기화 기능(SQL)이 아직 설치되지 않았습니다.' : /Failed to fetch|NetworkError|Load failed/i.test(e.message) ? '인터넷 연결 또는 접속 차단' : e.message);
+      var why = (/PGRST202|404/.test(e.message) ? '서버에 초기화 기능(SQL)이 아직 설치되지 않았습니다.' : /Failed to fetch|NetworkError|Load failed/i.test(e.message) ? '인터넷 연결 또는 접속 차단' : e.message);
       err.textContent='초기화하지 못했습니다 → '+why; window.alert('초기화하지 못했습니다 → '+why);
     });
   }
